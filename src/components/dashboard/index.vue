@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-[#16151a] p-4" style="overflow-x: hidden">
+  <div class="bg-[#16151a] p-4 pb-0" style="overflow-x: hidden">
     <div class="grid grid-cols-12 gap-4 mb-4">
       <div class="xl:col-span-6 lg:col-span-6 md:col-span-12">
         <FundraisingRoundsByStageChart :data="data" :loading="loading" />
@@ -12,7 +12,7 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-12 gap-4 mb-4">
+    <div class="grid grid-cols-12 gap-4">
       <div class="xl:col-span-9 lg:col-span-9 md:col-span-12">
         <FundingRoundsByCategory :data="data" :loading="loading" />
       </div>
