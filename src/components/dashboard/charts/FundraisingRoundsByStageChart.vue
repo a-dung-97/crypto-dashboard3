@@ -5,7 +5,6 @@
       :options="options"
       height="600px"
       ref="highchart"
-      isStockChart
     />
   </ChartWrapper>
 </template>
@@ -75,6 +74,15 @@ export default {
           backgroundColor: "#2e2e33",
         },
         title: {
+          text: "Number of Fundraising Rounds by Stage",
+          align: "left",
+          style: {
+            fontSize: "20px",
+            fontWeight: "bold",
+            color: "white",
+          },
+        },
+        subtitle: {
           useHTML: true,
           style: {
             color: "#ffffff",
@@ -180,7 +188,6 @@ export default {
     fetchData() {
       try {
         let data = this.data;
-        console.log(data);
         let roundArr = [...data.map((item) => item.round)];
         this.total = roundArr.length;
         let round = [

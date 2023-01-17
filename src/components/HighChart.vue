@@ -11,7 +11,6 @@ require("highcharts/modules/treemap")(Highcharts);
 require("highcharts/highcharts-more")(Highcharts);
 require("highcharts/modules/accessibility")(Highcharts);
 require("highcharts/modules/accessibility")(HighchartStock);
-
 Highcharts.setOptions({
   time: {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -22,7 +21,22 @@ HighchartStock.setOptions({
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   },
 });
-
+HighchartStock.dateFormats = {
+  q: function (timestamp) {
+    var date = new Date(timestamp),
+      quarter = Math.floor(date.getUTCMonth() / 3) + 1;
+    console.log(quarter);
+    return quarter;
+  },
+};
+Highcharts.dateFormats = {
+  q: function (timestamp) {
+    var date = new Date(timestamp),
+      quarter = Math.floor(date.getUTCMonth() / 3) + 1;
+    console.log(quarter);
+    return quarter;
+  },
+};
 export default {
   props: {
     id: {
