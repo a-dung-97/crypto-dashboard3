@@ -5,6 +5,6 @@ module.exports = defineConfig({
   publicPath: "/",
   publicPath:
     process.env.NODE_ENV === "production"
-      ? "/crypto-dashboard-3/" // Thay tên repository
+      ? "/crypto-dashboard3/" // Thay tên repository
       : "/",
 });
