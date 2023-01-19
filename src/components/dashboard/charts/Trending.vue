@@ -3,15 +3,17 @@
     <div class="flex justify-center items-center mb-4">
       <!-- <div class="flex"> -->
       <div
+        style="font-family: 'Rubik'"
         class="overflow-hidden whitespace-nowrap text-ellipsis text-white font-bold text-[20px]"
       >
         <slot name="title"> {{ title }} </slot>
       </div>
     </div>
     <div
+      style="font-family: 'Rubik'"
       class="overflow-hidden whitespace-nowrap text-ellipsis text-white text-center text-[48px] font-bold align-top leading-[50px] h-full"
     >
-      <div>{{ currentQuarterValue }}</div>
+      <div style="font-family: 'Rubik'">{{ currentQuarterValue }}</div>
     </div>
     <div
       class="overflow-hidden whitespace-nowrap text-ellipsis text-gray-400 text-center text-[16px] font-light align-top leading-[50px] h-full mb-3"

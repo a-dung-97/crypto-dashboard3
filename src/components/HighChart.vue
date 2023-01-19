@@ -21,21 +21,16 @@ HighchartStock.setOptions({
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   },
 });
+const quarterFormatter = function (timestamp) {
+  var date = new Date(timestamp),
+    quarter = Math.floor(date.getUTCMonth() / 3) + 1;
+  return quarter;
+};
 HighchartStock.dateFormats = {
-  q: function (timestamp) {
-    var date = new Date(timestamp),
-      quarter = Math.floor(date.getUTCMonth() / 3) + 1;
-    console.log(quarter);
-    return quarter;
-  },
+  q: quarterFormatter,
 };
 Highcharts.dateFormats = {
-  q: function (timestamp) {
-    var date = new Date(timestamp),
-      quarter = Math.floor(date.getUTCMonth() / 3) + 1;
-    console.log(quarter);
-    return quarter;
-  },
+  q: quarterFormatter,
 };
 export default {
   props: {

@@ -1,0 +1,135 @@
+export const ROUNDS = [
+  {
+    value: "Seed",
+    name: "Seed",
+  },
+  {
+    value: "Strategic ",
+    name: "Strategic",
+  },
+  {
+    value: "Series A",
+    name: "Series A",
+  },
+  {
+    value: "Series B",
+    name: "Series B",
+  },
+  {
+    value: "Series C",
+    name: "Series C",
+  },
+  {
+    value: "Series D",
+    name: "Series D",
+  },
+  {
+    value: "Series E",
+    name: "Series E",
+  },
+  {
+    value: "Series F",
+    name: "Series F",
+  },
+];
+export const CATEGORIES = [
+  {
+    values: [
+      "L1",
+      "L2",
+      "Infrastructure",
+      "Smart Contract Platform",
+      "Zero Knowledge Industry",
+      "Layer1",
+      "Layer 1",
+      "DAO",
+    ],
+    name: "Infrastructure",
+    color: "#7c7cf4",
+  },
+  {
+    values: [
+      "Blockchain-as-a-Service",
+      "Cloud Intelligence",
+      "Custody",
+      "Cybersecurity",
+      "Information security",
+      "Information services digital assets",
+      "IoT",
+      "MEV",
+      "Mining",
+      "Scaling Solution",
+      "Smart contract audits",
+      "Smart contract security",
+      "Storage",
+      "SaaS",
+      "data",
+      "analytics",
+      "management",
+      "solution",
+      "solutions",
+    ],
+    name: "Blockchain Service",
+    color: "#7F00FF",
+  },
+  {
+    values: [
+      "CEX",
+      "CeFi",
+      "CeFi Yield",
+      "Centralized Exchange",
+      "market maker",
+      "exchange",
+    ],
+    name: "CeFi",
+    color: "#DA70D6",
+  },
+  {
+    values: [
+      "DEX",
+      "DeFi",
+      "DAO infrastructure",
+      "Decentrallized",
+      "wallet",
+      "AMM",
+      "liquidly",
+      "swap",
+      "leveraged",
+      "lending",
+      "borrowing",
+      "money",
+    ],
+    name: "DeFi",
+    color: "#8ab4f8",
+  },
+  {
+    values: ["Game", "Gaming", "Metaverse", "play"],
+    name: "GameFi",
+    color: "#6495ED",
+  },
+  {
+    values: ["NFT", "NFTs"],
+    name: "NFTs",
+    color: "#01bbbb",
+  },
+  {
+    values: ["Web3"],
+    name: "Web3",
+    color: "#3dca3d",
+  },
+  {
+    values: ["Payments", "Flat", "payment"],
+    name: "Currency",
+    color: "#aecbfa",
+  },
+  {
+    values: ["Social Platform", "social", "network"],
+    name: "Social",
+    color: "rgb(234 179 8)",
+  },
+  {
+    values: [],
+    name: "Others",
+    color: "rgb(209 213 219)",
+  },
+];
