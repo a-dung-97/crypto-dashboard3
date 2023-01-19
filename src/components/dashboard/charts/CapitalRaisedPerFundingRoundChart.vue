@@ -28,7 +28,7 @@ const ROUNDS = [
   {
     value: "Series B",
     name: "Series B",
-    color: "#f50057",
+    color: "#bdbdbd",
   },
   {
     value: "Series C",

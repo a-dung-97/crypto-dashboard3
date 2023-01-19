@@ -38,7 +38,7 @@ const TYPES = [
   {
     range: [1, 5],
     name: "$1-5M",
-    color: "#673ab7",
+    color: "#9575cd",
   },
   {
     range: [-Infinity, 1],

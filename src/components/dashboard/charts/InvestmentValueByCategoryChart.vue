@@ -136,7 +136,6 @@ export default {
             fontWeight: "normal",
           },
           labelFormatter: function () {
-            vm.total = this.total;
             return (
               "<div> " +
               '<div class="row" style="display: flex; width: 150px; height:25px; justify-content: space-between;"> ' +
@@ -144,7 +143,7 @@ export default {
               this.name +
               "</div>" +
               '<div class="col">' +
-              roundValue(this.percentage, 2) +
+              roundValue((this.y * 100) / vm.total, 2) +
               "%" +
               "</div>" +
               "</div>" +
@@ -181,36 +180,64 @@ export default {
     fetchData() {
       try {
         const range = getDateRangeByTimeFrame(this.timeFrame);
-        let data = this.data.filter((i) => {
+        const data = this.data.filter((i) => {
           const date = i.date * 1000;
           return date >= range[0] && date <= range[1];
         });
         this.total = data.length;
-
+        this.totalAmount = (
+          (_.sumBy(data, "amount") * 1000000) /
+          1000000000
+        ).toFixed(1);
         let round = [];
+        const categories = CATEGORIES.map((c) => c.values).flat();
+        const others = data.filter((i) => {
+          return i.category && !categories.includes(i.category);
+        });
+        const invalidData = data.filter((i) => {
+          return (
+            (!i.category && !i.sector) ||
+            (i.sector &&
+              !i.category &&
+              !categories.some((v) =>
+                i.sector.toLowerCase().includes(v.toLowerCase())
+              ))
+          );
+        });
+        const ids = others
+          .map((i) => i._id)
+          .concat(invalidData.map((i) => i._id));
+        const validData = data.filter((i) => !ids.includes(i._id));
         for (const category of CATEGORIES) {
           round.push({
             name: category.name,
-            count: data.filter((i) => {
-              return i.category
-                ? category.values.includes(i.category)
-                : category.values.includes(i.sector);
+            count: validData.filter((i) => {
+              if (i.category) {
+                if (category.values.includes(i.category)) {
+                  return true;
+                } else {
+                  return false;
+                }
+              } else {
+                if (
+                  i.sector &&
+                  category.values.some((v) =>
+                    i.sector.toLowerCase().includes(v.toLowerCase())
+                  )
+                ) {
+                  return true;
+                } else {
+                  return false;
+                }
+              }
             }).length,
             color: category.color,
           });
         }
-        let othersRoundCount = () => {
-          let sum = 0;
-          for (let i = 0; i < round.length - 1; i++) {
-            sum += round[i].count;
-          }
-          return sum;
-        };
-        round[9].count = data.length - othersRoundCount();
+        round[9].count = others.length;
         round = _.orderBy(round.slice(0, -1), ["count"], ["desc"]).concat(
           round[9]
         );
-
         this.seriesOptions = [
           {
             type: "pie",
@@ -220,8 +247,8 @@ export default {
           },
         ];
         this.titleText = `
-            <div class="text-center col-span-12 font-bold text-6xl">${this.total}</div>
-            <div class="text-center font-medium text-3xl">Total</div>
+            <div class="text-center col-span-12 font-bold text-6xl">${this.totalAmount}b</div>
+            <div class="text-center font-medium text-3xl">USD</div>
             `;
       } catch (error) {
         console.log(error);
