@@ -2,7 +2,7 @@
   <div class="bg-[#16151a] p-4 pb-0" style="overflow-x: hidden">
     <div class="grid grid-cols-12 gap-4 mb-4">
       <div class="xl:col-span-6 lg:col-span-6 md:col-span-12">
-        <FundraisingRoundsByStageChart :data="data" :loading="loading" />
+        <InvestmentValueByCategoryChart :data="data" :loading="loading" />
       </div>
       <div class="xl:col-span-6 lg:col-span-6 md:col-span-12">
         <DealsBySizeChart :data="data" :loading="loading" />
@@ -14,7 +14,7 @@
 
     <div class="grid grid-cols-12 gap-4">
       <div class="xl:col-span-9 lg:col-span-9 md:col-span-12">
-        <FundingRoundsByCategory :data="data" :loading="loading" />
+        <CategoryRatioPerFundingRound :data="data" :loading="loading" />
       </div>
       <div class="xl:col-span-3 lg:col-span-3 md:col-span-12">
         <Trending
@@ -35,16 +35,16 @@
 const API_URL = "https://pro.coingen.net/api/llama-raises";
 import CapitalRaisedPerFundingRoundChart from "./charts/CapitalRaisedPerFundingRoundChart.vue";
 import DealsBySizeChart from "./charts/DealsBySizeChart.vue";
-import FundingRoundsByCategory from "./charts/FundingRoundsByCategory.vue";
-import FundraisingRoundsByStageChart from "./charts/FundraisingRoundsByStageChart.vue";
+import CategoryRatioPerFundingRound from "./charts/CategoryRatioPerFundingRound.vue";
+import InvestmentValueByCategoryChart from "./charts/InvestmentValueByCategoryChart.vue";
 import Trending from "./charts/Trending.vue";
 
 export default {
   name: "Dashboard",
   components: {
-    FundraisingRoundsByStageChart,
+    InvestmentValueByCategoryChart,
     DealsBySizeChart,
-    FundingRoundsByCategory,
+    CategoryRatioPerFundingRound,
     CapitalRaisedPerFundingRoundChart,
     Trending,
   },
@@ -55,21 +55,43 @@ export default {
       trendings: [
         {
           title: "DeFi",
-          values: ["DeFi"],
+          values: [
+            "DEX",
+            "DeFi",
+            "DAO infrastructure",
+            "Decentrallized",
+            "wallet",
+            "AMM",
+            "liquidly",
+            "swap",
+            "leveraged",
+            "lending",
+            "borrowing",
+            "money",
+          ],
           currentQuarterValue: 0,
           lastQuaterValue: 0,
           growth: 0,
         },
         {
           title: "Web3 & NFTs",
-          values: ["Web3", "NFT"],
+          values: ["NFT", "NFTs", "Web3"],
           currentQuarterValue: 0,
           lastQuaterValue: 0,
           growth: 0,
         },
         {
           title: "Infrastructure",
-          values: ["Infrastructure"],
+          values: [
+            "Infrastructure",
+            "L1",
+            "L2",
+            "Smart Contract Platform",
+            "Zero Knowledge Industry",
+            "Layer1",
+            "Layer 1",
+            "DAO",
+          ],
           currentQuarterValue: 0,
           lastQuaterValue: 0,
           growth: 0,
@@ -97,13 +119,13 @@ export default {
     calculateTrending() {
       const today = new Date();
       const quarter = Math.floor(today.getMonth() / 3);
-      const startFullQuarter = new Date(
+      const firstDateOfQuarter = new Date(
         Date.UTC(today.getFullYear(), quarter * 3, 1)
       );
       const endFullQuarter = new Date(
         Date.UTC(
-          startFullQuarter.getFullYear(),
-          startFullQuarter.getMonth() + 3,
+          firstDateOfQuarter.getFullYear(),
+          firstDateOfQuarter.getMonth() + 3,
           0
         )
       );
@@ -118,7 +140,7 @@ export default {
         )
       );
       const currentRange = [
-        startFullQuarter.getTime() / 1000,
+        firstDateOfQuarter.getTime() / 1000,
         endFullQuarter.getTime() / 1000,
       ];
       const lastRange = [
@@ -129,23 +151,31 @@ export default {
         trending.currentQuarterValue = _.sum(
           trending.values.map(
             (v) =>
-              this.data.filter(
-                (i) =>
-                  i.category === v &&
+              this.data.filter((i) => {
+                const categoryCondition = i.category
+                  ? trending.values.includes(i.category)
+                  : trending.values.includes(i.sector);
+                return (
+                  categoryCondition &&
                   i.date >= currentRange[0] &&
                   i.date <= currentRange[1]
-              ).length
+                );
+              }).length
           )
         );
         trending.lastQuaterValue = _.sum(
           trending.values.map(
             (v) =>
-              this.data.filter(
-                (i) =>
-                  i.category === v &&
+              this.data.filter((i) => {
+                const categoryCondition = i.category
+                  ? trending.values.includes(i.category)
+                  : trending.values.includes(i.sector);
+                return (
+                  categoryCondition &&
                   i.date >= lastRange[0] &&
                   i.date <= lastRange[1]
-              ).length
+                );
+              }).length
           )
         );
         trending.growth = +(
@@ -153,7 +183,6 @@ export default {
           trending.lastQuaterValue
         ).toFixed(0);
       }
-      console.log(this.trendings);
     },
   },
   created() {

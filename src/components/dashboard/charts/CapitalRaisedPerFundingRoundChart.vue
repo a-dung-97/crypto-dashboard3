@@ -16,50 +16,41 @@ import Highcharts from "highcharts";
 
 const ROUNDS = [
   {
-    value: "Angel Round",
-    name: "Angel",
-    color: "#b71c1c",
-  },
-  {
     value: "Seed",
     name: "Seed",
-    color: "#f44336",
+    color: "#1565c0",
   },
   {
     value: "Series A",
     name: "Series A",
-    color: "#fb8c00",
+    color: "#1de9b6",
   },
   {
     value: "Series B",
     name: "Series B",
-    color: "#00e676",
+    color: "#f50057",
   },
   {
     value: "Series C",
     name: "Series C",
-    color: "#ffee58",
+    color: "#9c27b0",
   },
   {
     value: "Series D",
     name: "Series D",
-    color: "#039be5",
-  },
-  {
-    value: "Series E",
-    name: "Series E",
-    color: "#e0e0e0",
+    color: "#f9a825",
   },
 ];
 const OPTIONS = {
   title: {
-    text: "Capital Raised per Funding Round",
+    text: "Monthly Capital Raised per Funding Round",
     align: "left",
     floating: true,
     style: {
       fontSize: "20px",
       fontWeight: "bold",
       color: "white",
+      fontFamily: "Rubik",
     },
   },
   plotOptions: {
@@ -87,21 +78,6 @@ const OPTIONS = {
     selected: 5,
     height: 45,
     buttons: [
-      {
-        type: "day",
-        count: 7,
-        text: "7D",
-      },
-      {
-        type: "month",
-        count: 1,
-        text: "1m",
-      },
-      {
-        type: "month",
-        count: 3,
-        text: "3m",
-      },
       {
         type: "month",
         count: 6,
@@ -153,22 +129,6 @@ const OPTIONS = {
     labelStyle: {
       display: "none",
     },
-    tooltip: {
-      formatter: function () {
-        return ["<b>" + Highcharts.dateFormat("%b'%y", this.x) + "</b>"].concat(
-          this.points
-            ? this.points.map(function (point) {
-                return (
-                  point.series.name +
-                  ": $" +
-                  (point.y / 1000000000).toFixed(2) +
-                  "B"
-                );
-              })
-            : []
-        );
-      },
-    },
   },
   chart: {
     backgroundColor: "#2e2e33",
@@ -188,7 +148,7 @@ const OPTIONS = {
       // gridLineDashStyle: "longdash",
       labels: {
         formatter: function () {
-          return "$" + parseFloat(this.value) / 1000000000 + "B";
+          return "$" + this.value + "B";
         },
         style: {
           color: "rgb(156 163 175)",
@@ -232,6 +192,38 @@ export default {
     options() {
       return {
         ...OPTIONS,
+
+        tooltip: {
+          useHTML: true,
+          backgroundColor: "#1f2937",
+          followPointer: true,
+          split: false,
+          followTouchMove: false,
+          animation: false,
+          borderWidth: 0,
+          shadow: false,
+          padding: 0,
+          hideDelay: 0,
+          shared: true,
+          formatter: function () {
+            let content = [];
+            this.points.forEach((point) => {
+              content.push(
+                `<div style="color:${point.color}">${
+                  point.series.name
+                }: <b class="text-500 font-bold" style="color:white"> $${point.y.toFixed(
+                  2
+                )}B</b> </div>`
+              );
+            });
+            content = content.join("");
+            const title = `<div class="text-gray-500 pb-1">Month: <b class="text-white font-semibold">${Highcharts.dateFormat(
+              "%b'%y",
+              this.x
+            )}</b></div>`;
+            return `<div class="border border-white rounded p-2">${title} ${content}</div>`;
+          },
+        },
         series: this.series,
       };
     },
@@ -258,14 +250,16 @@ export default {
         for (const time in groups[group]) {
           data.push({
             x: +time,
-            y: _.sumBy(groups[group][time], "amount") * 1000000,
+            y:
+              parseFloat(_.sumBy(groups[group][time], "amount") * 1000000) /
+              1000000000,
           });
         }
         const round = ROUNDS.find((r) => r.value === group);
         series.push({
           name: round.name,
           data: _.sortBy(data, "x"),
-          type: "line",
+          type: "spline",
           color: round.color,
           marker: {
             enabled: false,

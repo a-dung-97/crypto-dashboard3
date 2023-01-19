@@ -1,5 +1,10 @@
 <template>
   <ChartWrapper :loading="loading">
+    <TimeFrame
+      class="absolute z-[1] top-[45px] right-[22px] text-white"
+      :time-frames="['Monthly', 'Quarterly']"
+      v-model="timeFrame"
+    />
     <HighChart
       id="deals-by-size"
       :options="options"
@@ -12,6 +17,7 @@
 <script>
 import ChartWrapper from "@/components/ChartWrapper.vue";
 import HighChart from "@/components/HighChart.vue";
+import TimeFrame from "@/components/TimeFrame.vue";
 import Highcharts from "highcharts";
 const TYPES = [
   {
@@ -49,6 +55,7 @@ const OPTIONS = {
       fontSize: "20px",
       fontWeight: "bold",
       color: "white",
+      fontFamily: "Rubik",
     },
   },
   plotOptions: {
@@ -74,21 +81,6 @@ const OPTIONS = {
     selected: 5,
     height: 45,
     buttons: [
-      {
-        type: "day",
-        count: 7,
-        text: "7D",
-      },
-      {
-        type: "month",
-        count: 1,
-        text: "1m",
-      },
-      {
-        type: "month",
-        count: 3,
-        text: "3m",
-      },
       {
         type: "month",
         count: 6,
@@ -140,24 +132,6 @@ const OPTIONS = {
     labelStyle: {
       display: "none",
     },
-    tooltip: {
-      formatter: function () {
-        return [
-          "<b>" + Highcharts.dateFormat("Q%q'%y", this.x) + "</b>",
-        ].concat(
-          this.points
-            ? this.points.map(function (point) {
-                return (
-                  point.series.name +
-                  ": $" +
-                  (point.y / 1000000000).toFixed(2) +
-                  "B"
-                );
-              })
-            : []
-        );
-      },
-    },
   },
   chart: {
     backgroundColor: "#2e2e33",
@@ -185,69 +159,122 @@ const OPTIONS = {
       showLastLabel: true,
     },
   ],
-
-  xAxis: {
-    title: null,
-    type: "datetime",
-    labels: {
-      format: "{value:Q%q'%y}",
-      style: {
-        color: "rgb(156 163 175)",
-      },
-    },
-  },
 };
 export default {
   props: {
     data: { type: Array, default: () => [] },
     loading: { type: Boolean, default: false },
   },
-  watch: {
-    data() {
-      this.transformData();
-    },
-  },
   data() {
     return {
-      series: [],
+      timeFrame: "quarterly",
     };
   },
-  components: { ChartWrapper, HighChart },
+  components: { ChartWrapper, HighChart, TimeFrame },
   computed: {
+    timeFormat() {
+      return this.timeFrame === "quarterly"
+        ? "{value:Q%q'%y}"
+        : "{value:%b'%y}";
+    },
     options() {
+      const vm = this;
       return {
         ...OPTIONS,
+        xAxis: {
+          title: null,
+          type: "datetime",
+          labels: {
+            format: this.timeFormat,
+            style: {
+              color: "rgb(156 163 175)",
+            },
+          },
+        },
+
+        tooltip: {
+          useHTML: true,
+          backgroundColor: "#1f2937",
+          followPointer: true,
+          split: false,
+          followTouchMove: false,
+          animation: false,
+          borderWidth: 0,
+          shadow: false,
+          padding: 0,
+          hideDelay: 0,
+          shared: true,
+          formatter: function () {
+            const type = vm.timeFrame.replace("ly", "");
+            let content = [];
+            this.points.forEach((point) => {
+              content.push(
+                `<div style="color:${point.color}">${
+                  point.series.name
+                }: <b class="text-500 font-bold" style="color:white"> $${point.point.custom.amount.toFixed(
+                  1
+                )}m</b> <span class="text-gray-500">(${point.point.custom.per.toFixed(
+                  2
+                )}%)</span>  </div>`
+              );
+            });
+            content = content.join("");
+            const title = `<div class="text-gray-500 pb-1">${
+              type.charAt(0).toUpperCase() + type.slice(1)
+            }: <b class="text-white font-semibold">${Highcharts.dateFormat(
+              type === "month" ? "%b'%y" : "Q%q'%y",
+              this.x
+            )}</b></div>`;
+            return `<div class="border border-white rounded p-2">${title} ${content}</div>`;
+          },
+        },
         series: this.series,
       };
     },
-  },
-  methods: {
-    transformData() {
-      const transformedData = [];
+    series() {
+      if (this.data.length === 0) return [];
       const series = [];
-      this.data.forEach((c) => {
-        const date = new Date(c.date * 1000);
-        const quarter = Math.floor(date.getMonth() / 3);
-        const startFullQuarter = new Date(
-          Date.UTC(date.getFullYear(), quarter * 3, 1)
-        );
-        transformedData.push({
-          ...c,
-          quarter: startFullQuarter.getTime(),
+      TYPES.forEach((type) => {
+        const transformedData = this.data.map((item) => {
+          const date = new Date(item.date * 1000);
+          const quarter = Math.floor(date.getMonth() / 3);
+          const firstDateOfMonth = new Date(
+            Date.UTC(date.getFullYear(), date.getMonth(), 1)
+          );
+          const firstDateOfQuarter = new Date(
+            Date.UTC(date.getFullYear(), quarter * 3, 1)
+          );
+          return {
+            ...item,
+            quarter: firstDateOfQuarter.getTime(),
+            month: firstDateOfMonth.getTime(),
+            amount: +item.amount,
+          };
         });
-      });
-      for (const type of TYPES) {
         const validData = transformedData.filter(
-          (item) => item.amount >= type.range[0] && item.amount <= type.range[1]
+          (item) => item.amount >= type.range[0] && item.amount < type.range[1]
         );
-        const groups = _.groupBy(validData, "quarter");
-        const data = [];
-        for (const time in groups) {
-          data.push({
+        const validDataGroups = _.groupBy(
+          validData,
+          this.timeFrame.replace("ly", "")
+        );
+        const transformedDataGroups = _.groupBy(
+          transformedData,
+          this.timeFrame.replace("ly", "")
+        );
+
+        const data = Object.keys(validDataGroups).map((time) => {
+          const total = _.sumBy(transformedDataGroups[time], "amount");
+          const amount = _.sumBy(validDataGroups[time], "amount");
+          return {
             x: +time,
-            y: groups[time].length,
-          });
-        }
+            y: validDataGroups[time].length,
+            custom: {
+              amount,
+              per: (amount * 100) / total,
+            },
+          };
+        });
         series.push({
           name: type.name,
           data: _.sortBy(data, "x"),
@@ -257,9 +284,12 @@ export default {
             enabled: false,
           },
         });
-      }
-      this.series = series;
+      });
+
+      return series;
     },
   },
+
+  methods: {},
 };
 </script>
